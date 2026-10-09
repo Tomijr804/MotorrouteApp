@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proef TomTom-routes</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      font-size: 15px;
+      color: #1b1b1b;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: 100vh;
+    }
+    #paneel { overflow-y: auto; padding: 16px; border-right: 1px solid #ddd; background: #fafafa; }
+    #kaart { height: 100%; }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    h2 { font-size: 15px; margin: 16px 0 6px; }
+    p, ol { margin: 6px 0; }
+    ol { padding-left: 20px; }
+    .soorten label { display: block; padding: 2px 0; cursor: pointer; }
+    button {
+      font: inherit; padding: 8px 14px; margin: 8px 8px 0 0;
+      border: 1px solid #888; border-radius: 6px; background: #fff; cursor: pointer;
+    }
+    button.hoofd { background: #1d6fe0; border-color: #1d6fe0; color: #fff; }
+    button:disabled { opacity: .5; cursor: default; }
+    select { font: inherit; padding: 6px 8px; border: 1px solid #888; border-radius: 6px; background: #fff; }
+    #melding { margin-top: 10px; padding: 8px; border-radius: 6px; background: #eef3fb; min-height: 20px; }
+    #melding.fout { background: #fdecea; color: #8a1c10; }
+    .klein { color: #555; font-size: 13px; }
+    .route { border: 1px solid #ddd; border-radius: 8px; background: #fff; padding: 8px 10px; margin: 8px 0; }
+    .route .kop { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .kleurvlak { width: 22px; height: 6px; border-radius: 3px; display: inline-block; }
+    .route details { margin-top: 6px; }
+    .route ol { max-height: 220px; overflow-y: auto; font-size: 13px; }
+    .route pre { font-size: 12px; white-space: pre-wrap; margin: 4px 0; }
+    .ikzelf { width: 14px; height: 14px; border-radius: 50%; background: #1d6fe0; border: 3px solid #fff; box-shadow: 0 0 0 1px #1d6fe0; }
+    @media (max-width: 760px) {
+      body { grid-template-columns: 1fr; grid-template-rows: 55vh 1fr; height: auto; }
+      #kaart { order: -1; height: 55vh; }
+      #paneel { border-right: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="paneel">
+    <h1>Proef: drie routes met verschillende bochtigheid</h1>
+    <p class="klein">Stap 1 van het plan. Dit is een testpagina, nog niet de echte app.</p>
+
+    <h2>Zo gebruik je het</h2>
+    <ol>
+      <li>Klik op de kaart om een <b>start</b> te zetten (groen).</li>
+      <li>Klik daarna tot <b>3 tussenpunten</b> (grijs).</li>
+      <li>Wil je van A naar B? Kies "Eindpunt" en klik de plek aan (zwart). Zet je geen eindpunt, dan rijdt de route terug naar de start (rondrit).</li>
+      <li>Druk op "Bereken 3 routes".</li>
+    </ol>
+
+    <h2>Wat zet de volgende klik neer?</h2>
+    <div class="soorten">
+      <label><input type="radio" name="soort" value="start" checked> Start</label>
+      <label><input type="radio" name="soort" value="tussen"> Tussenpunt</label>
+      <label><input type="radio" name="soort" value="eind"> Eindpunt (optioneel)</label>
+    </div>
+    <p id="puntenoverzicht" class="klein"></p>
+
+    <h2>Voertuig</h2>
+    <select id="voertuig">
+      <option value="car">Auto</option>
+      <option value="motorcycle">Motor (bèta bij TomTom)</option>
+    </select>
+
+    <button id="berekenknop" class="hoofd">Bereken 3 routes</button>
+    <button id="wisknop">Wis alles</button>
+    <p class="klein">Elke berekening kost 3 TomTom-aanvragen (laag, normaal, hoog).</p>
+
+    <div id="melding"></div>
+    <div id="resultaten"></div>
+  </div>
+
+  <div id="kaart"></div>
+
+  <script type="module" src="proef.js"></script>
+</body>
+</html>

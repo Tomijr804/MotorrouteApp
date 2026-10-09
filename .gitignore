@@ -1,0 +1,13 @@
+# Zet je API-sleutel nooit in git
+proef/sleutel.js
+.env
+.env.local
+*.local
+
+# Persoonlijke bestanden: alleen op mijn pc, niet in de openbare repository
+PLAN.md
+CLAUDE.md
+
+# Gegenereerd door npm en Vite
+node_modules/
+dist/

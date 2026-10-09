@@ -1,0 +1,57 @@
+# Bouwt de app in de map "app" en zet hem op GitHub Pages, bij elke wijziging op de hoofdtak (main).
+# Gebaseerd op het voorbeeld uit de Vite-documentatie (https://vite.dev/guide/static-deploy.html),
+# aangepast omdat onze app in de submap "app" staat.
+name: Deploy static content to Pages
+
+on:
+  # Draait bij elke push naar de hoofdtak
+  push:
+    branches: ['main']
+
+  # Hiermee kan ik hem ook met de hand starten via het tabblad Actions
+  workflow_dispatch:
+
+# Rechten die nodig zijn om naar GitHub Pages te publiceren
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Maximaal één publicatie tegelijk
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    # Alle opdrachten van het type "run" worden in de map app uitgevoerd
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: lts/*
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          # De gebouwde bestanden staan in app/dist
+          path: './app/dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
