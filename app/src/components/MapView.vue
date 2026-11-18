@@ -120,7 +120,8 @@ function tekenRoute() {
   if (route) {
     const grenzen = new LngLatBounds()
     route.coordinaten.forEach((coordinaat) => grenzen.extend(coordinaat))
-    kaart.fitBounds(grenzen, { padding: 50 })
+    // Onderaan meer ruimte, want daar staan de knop "Mijn locatie" en de bronvermelding.
+    kaart.fitBounds(grenzen, { padding: { top: 40, right: 50, bottom: 120, left: 40 } })
   }
 }
 

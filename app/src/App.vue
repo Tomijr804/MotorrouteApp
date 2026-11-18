@@ -2,6 +2,7 @@
 import MapView from './components/MapView.vue'
 import PuntenBlok from './components/PuntenBlok.vue'
 import RouteForm from './components/RouteForm.vue'
+import RouteResultaat from './components/RouteResultaat.vue'
 import SleutelVak from './components/SleutelVak.vue'
 </script>
 
@@ -10,8 +11,9 @@ import SleutelVak from './components/SleutelVak.vue'
     <MapView class="kaartvak" />
     <div class="onderkant">
       <SleutelVak />
-      <RouteForm />
       <PuntenBlok />
+      <RouteForm />
+      <RouteResultaat />
     </div>
   </main>
 </template>

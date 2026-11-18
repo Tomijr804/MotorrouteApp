@@ -3,7 +3,14 @@
 
 const BASIS = 'https://api.tomtom.com/routing/1/calculateRoute'
 
-export class TomTomFout extends Error {}
+// soort: 'geen-route' (TomTom vond geen route of kon een punt niet bij een weg vinden),
+// 'sleutel' (aanvraag geweigerd), 'verbinding' (geen internet) of 'anders'.
+export class TomTomFout extends Error {
+  constructor(bericht, soort = 'anders') {
+    super(bericht)
+    this.soort = soort
+  }
+}
 
 // punten: lijst met { lng, lat }, van start via tussenpunten naar het einde.
 // voertuig: 'motorcycle' of 'car'. bochtigheid: 'low', 'normal' of 'high'.
@@ -20,7 +27,7 @@ export async function berekenRoute({ sleutel, punten, voertuig, bochtigheid }) {
   try {
     antwoord = await fetch(`${BASIS}/${locaties}/json?${parameters}`)
   } catch {
-    throw new TomTomFout('Geen verbinding met TomTom. Controleer je internet en probeer het opnieuw.')
+    throw new TomTomFout('Geen verbinding met TomTom. Controleer je internet en probeer het opnieuw.', 'verbinding')
   }
 
   const tekst = await antwoord.text()
@@ -32,7 +39,7 @@ export async function berekenRoute({ sleutel, punten, voertuig, bochtigheid }) {
   }
 
   if (!antwoord.ok) {
-    throw new TomTomFout(foutTekst(antwoord.status, data, sleutel))
+    throw maakFout(antwoord.status, data, sleutel)
   }
 
   const route = data?.routes?.[0]
@@ -47,18 +54,27 @@ export async function berekenRoute({ sleutel, punten, voertuig, bochtigheid }) {
   }
 }
 
-function foutTekst(status, data, sleutel) {
-  if (data?.detailedError?.code === 'NO_ROUTE_FOUND') {
-    return 'TomTom vond geen route tussen deze punten. Probeer andere punten.'
+// De foutcodes staan in de documentatie onder "detailedError".
+function maakFout(status, data, sleutel) {
+  const code = data?.detailedError?.code
+  if (code === 'NO_ROUTE_FOUND') {
+    return new TomTomFout('TomTom vond geen route tussen deze punten.', 'geen-route')
+  }
+  if (code === 'MAP_MATCHING_FAILURE') {
+    return new TomTomFout('TomTom kon een van de punten niet bij een weg vinden.', 'geen-route')
+  }
+  if (code === 'COMPUTE_TIME_LIMIT_EXCEEDED') {
+    return new TomTomFout('TomTom had te veel rekentijd nodig voor deze route. Probeer een kortere rit.')
   }
   if (status === 401 || status === 403) {
-    return (
+    return new TomTomFout(
       `TomTom weigert de aanvraag (HTTP ${status}). Mogelijke oorzaken: de sleutel klopt niet, ` +
-      'de Routing API staat niet aan op je sleutel, of de gratis limiet is bereikt.'
+        'de Routing API staat niet aan op je sleutel, of de gratis limiet is bereikt.',
+      'sleutel',
     )
   }
   const uitleg = data?.detailedError?.message ?? data?.error?.description ?? data?.message ?? ''
   // Voor de zekerheid: de sleutel mag nooit in een melding terechtkomen.
   const veilig = sleutel ? String(uitleg).split(sleutel).join('…') : String(uitleg)
-  return `TomTom gaf een fout (HTTP ${status}). ${veilig}`.trim()
+  return new TomTomFout(`TomTom gaf een fout (HTTP ${status}). ${veilig}`.trim())
 }
