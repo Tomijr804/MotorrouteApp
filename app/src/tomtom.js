@@ -21,6 +21,8 @@ export async function berekenRoute({ sleutel, punten, voertuig, bochtigheid }) {
     travelMode: voertuig,
     routeType: 'thrilling',
     windingness: bochtigheid,
+    // Zo min mogelijk twee keer over dezelfde weg (getest op 18 november 2026: minder dubbel gereden stukken).
+    avoid: 'alreadyUsedRoads',
   })
 
   let antwoord
